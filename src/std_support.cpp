@@ -34,7 +34,7 @@
 #include "std_support.hpp"
 #include <cstdlib>
 #include <errno.h>
-
+#include <limits>
 
 unsigned long long std_support::strtoull(const char *nptr, char **endptr, int base) {
     const char *s;
@@ -70,8 +70,8 @@ unsigned long long std_support::strtoull(const char *nptr, char **endptr, int ba
     if (base < 2 || base > 36)
         goto noconv;
 
-    cutoff = ULLONG_MAX / base;
-    cutlim = ULLONG_MAX % base;
+    cutoff = std::numeric_limits<unsigned long long>::max() / base;
+    cutlim = std::numeric_limits<unsigned long long>::max() % base;
     for ( ; ; c = *s++) {
         if (c >= '0' && c <= '9')
             c -= '0';
@@ -92,7 +92,7 @@ unsigned long long std_support::strtoull(const char *nptr, char **endptr, int ba
         }
     }
     if (any < 0) {
-        acc = ULLONG_MAX;
+        acc = std::numeric_limits<unsigned long long>::max();
         errno = ERANGE;
     } else if (!any) {
         noconv:
@@ -163,7 +163,7 @@ long long std_support::strtoll(const char *nptr, char **endptr, int base) {
      * Set any if any `digits' consumed; make it negative to indicate
      * overflow.
      */
-    cutoff = neg ? LLONG_MIN : LLONG_MAX;
+    cutoff = neg ? std::numeric_limits<long long>::min() : std::numeric_limits<long long>::max();
     cutlim = (int)(cutoff % base);
     cutoff /= base;
     if (neg) {
@@ -187,7 +187,7 @@ long long std_support::strtoll(const char *nptr, char **endptr, int base) {
         if (neg) {
             if (acc < cutoff || (acc == cutoff && c > cutlim)) {
                 any = -1;
-                acc = LLONG_MIN;
+                acc = std::numeric_limits<long long>::min();
                 errno = ERANGE;
             } else {
                 any = 1;
@@ -197,7 +197,7 @@ long long std_support::strtoll(const char *nptr, char **endptr, int base) {
         } else {
             if (acc > cutoff || (acc == cutoff && c > cutlim)) {
                 any = -1;
-                acc = LLONG_MAX;
+                acc = std::numeric_limits<long long>::max();
                 errno = ERANGE;
             } else {
                 any = 1;
